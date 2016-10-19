@@ -1244,6 +1244,7 @@ void OSDMonitor::encode_pending(MonitorDBStore::TransactionRef t)
     bufferlist fullbl;
     ::encode(tmp, fullbl, features | CEPH_FEATURE_RESERVED);
     pending_inc.full_crc = tmp.get_crc();
+    pending_inc.encode_features = features;
 
     // include full map in the txn.  note that old monitors will
     // overwrite this.  new ones will now skip the local full map
