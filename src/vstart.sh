@@ -97,7 +97,11 @@ cephx=1 #turn cephx on by default
 cache=""
 memstore=0
 bluestore=0
+<<<<<<< HEAD
 rgw_frontend="civetweb"
+=======
+kstore=0
+>>>>>>> 42acb9f3da2e0b77b7f8bf71d43b2439617563c5
 lockdep=${LOCKDEP:-1}
 
 VSTART_SEC="client.vstart.sh"
@@ -133,6 +137,7 @@ usage=$usage"\t--mds_num specify ceph mds count\n"
 usage=$usage"\t--rgw_port specify ceph rgw http listen port\n"
 usage=$usage"\t--rgw_frontend specify the rgw frontend configuration\n"
 usage=$usage"\t-b, --bluestore use bluestore as the osd objectstore backend\n"
+usage=$usage"\t--kstore use kstore as the osd objectstore backend\n"
 usage=$usage"\t--memstore use memstore as the osd objectstore backend\n"
 usage=$usage"\t--cache <pool>: enable cache tiering on pool\n"
 usage=$usage"\t--short: short object names only; necessary for ext4 dev\n"
@@ -259,6 +264,9 @@ case $1 in
 	    ;;
     -b | --bluestore )
 	    bluestore=1
+	    ;;
+    --kstore )
+	    kstore=1
 	    ;;
     --hitset )
 	    hitset="$hitset $2 $3"
@@ -411,6 +419,10 @@ fi
 if [ "$bluestore" -eq 1 ]; then
     COSDMEMSTORE='
 	osd objectstore = bluestore'
+fi
+if [ "$kstore" -eq 1 ]; then
+    COSDMEMSTORE='
+	osd objectstore = kstore'
 fi
 
 if [ -z "$CEPH_PORT" ]; then

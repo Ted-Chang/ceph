@@ -74,8 +74,13 @@ class RocksDBStore : public KeyValueDB {
   std::shared_ptr<rocksdb::Statistics> dbstats;
   rocksdb::BlockBasedTableOptions bbt_opts;
   string options_str;
+<<<<<<< HEAD
 
   int do_open(ostream &out, bool create_if_missing);
+=======
+  int do_open(ostream &out, bool create_if_missing, int num_shards,
+	      std::vector<KeyValueDB::Shard> *shards);
+>>>>>>> 42acb9f3da2e0b77b7f8bf71d43b2439617563c5
 
   // manage async compactions
   Mutex compact_queue_lock;
@@ -143,16 +148,30 @@ public:
   static bool check_omap_dir(string &omap_dir);
   /// Opens underlying db
   int open(ostream &out) {
-    return do_open(out, false);
+    return do_open(out, false, 0, nullptr);
   }
   /// Creates underlying db if missing and opens it
   int create_and_open(ostream &out);
 
   void close();
 
+<<<<<<< HEAD
   void split_stats(const std::string &s, char delim, std::vector<std::string> &elems);
   void get_statistics(Formatter *f);
 
+=======
+  /// Opens underlying db and shards
+  int open_shards(ostream &out, int num_shards,
+		  vector<KeyValueDB::Shard> *shards) {
+    return do_open(out, false, num_shards, shards);
+  }
+  /// Creates underlying db and shards if missing and opens them
+  int create_and_open_shards(ostream &out, int num_shards,
+			     vector<KeyValueDB::Shard> *shards);
+  void close_shard(KeyValueDB::Shard s);
+  int drop_shard(KeyValueDB::Shard s);
+  
+>>>>>>> 42acb9f3da2e0b77b7f8bf71d43b2439617563c5
   struct  RocksWBHandler: public rocksdb::WriteBatch::Handler {
     std::string seen ;
     int num_seen = 0;
@@ -255,18 +274,32 @@ public:
       const string &prefix,
       const string &k,
       const bufferlist &bl) override;
+<<<<<<< HEAD
     void set(
       const string &prefix,
       const char *k,
       size_t keylen,
+=======
+    void set_in_shard(
+      const KeyValueDB::Shard s,
+      const string &prefix,
+      const string &k,
+>>>>>>> 42acb9f3da2e0b77b7f8bf71d43b2439617563c5
       const bufferlist &bl) override;
     void rmkey(
       const string &prefix,
       const string &k) override;
+<<<<<<< HEAD
     void rmkey(
       const string &prefix,
       const char *k,
       size_t keylen) override;
+=======
+    void rmkey_from_shard(
+      const KeyValueDB::Shard s,
+      const string &prefix,
+      const string &k) override;
+>>>>>>> 42acb9f3da2e0b77b7f8bf71d43b2439617563c5
     void rm_single_key(
       const string &prefix,
       const string &k) override;
@@ -294,6 +327,7 @@ public:
     const string &prefix,
     const string &key,
     bufferlist *out
+<<<<<<< HEAD
     ) override;
   int get(
     const string &prefix,
@@ -301,6 +335,15 @@ public:
     size_t keylen,
     bufferlist *out) override;
 
+=======
+    );
+  int get_from_shard(
+    const KeyValueDB::Shard s,
+    const string &prefix,
+    const string &key,
+    bufferlist *out
+    );
+>>>>>>> 42acb9f3da2e0b77b7f8bf71d43b2439617563c5
 
   class RocksDBWholeSpaceIteratorImpl :
     public KeyValueDB::WholeSpaceIteratorImpl {

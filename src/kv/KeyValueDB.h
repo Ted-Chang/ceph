@@ -21,6 +21,8 @@ using std::string;
  */
 class KeyValueDB {
 public:
+  typedef void * Shard;
+  
   class TransactionImpl {
   public:
     /// Set Keys
@@ -56,12 +58,23 @@ public:
       const std::string &k,	      ///< [in] Key to set
       const bufferlist &bl    ///< [in] Value to set
       ) = 0;
+<<<<<<< HEAD
     virtual void set(
       const std::string &prefix,
       const char *k,
       size_t keylen,
       const bufferlist& bl) {
       set(prefix, string(k, keylen), bl);
+=======
+
+    /// Set Key in DB shard
+    virtual void set_in_shard(
+      const KeyValueDB::Shard s,
+      const std::string &prefix,
+      const std::string &k,
+      const bufferlist &bl) {
+      assert(0 == "Not implemented");
+>>>>>>> 42acb9f3da2e0b77b7f8bf71d43b2439617563c5
     }
 
     /// Removes Keys (via encoded bufferlist)
@@ -102,6 +115,13 @@ public:
       rmkey(prefix, string(k, keylen));
     }
 
+    virtual void rmkey_from_shard(
+      const KeyValueDB::Shard s,
+      const std::string &prefix,
+      const std::string &k) {
+      assert(0 == "Not implemented");
+    }
+
     /// Remove Single Key which exists and was not overwritten.
     /// This API is only related to performance optimization, and should only be 
     /// re-implemented by log-insert-merge tree based keyvalue stores(such as RocksDB). 
@@ -140,6 +160,22 @@ public:
   virtual int create_and_open(std::ostream &out) = 0;
   virtual void close() { }
 
+  /// Create/open DB shards
+  virtual int open_shards(std::ostream &out, int num_shards,
+			  std::vector<Shard> *shards) {
+    assert(0 == "Not implemented");
+  }
+  virtual int create_and_open_shards(std::ostream &out, int num_shards,
+				     std::vector<Shard> *shards) {
+    assert(0 == "Not implemented");
+  }
+  virtual void close_shard(Shard s) {
+    assert(0 == "Not implemented");
+  }
+  virtual int drop_shard(Shard s) {
+    assert(0 == "Not implemented");
+  }
+
   virtual Transaction get_transaction() = 0;
   virtual int submit_transaction(Transaction) = 0;
   virtual int submit_transaction_sync(Transaction t) {
@@ -167,10 +203,18 @@ public:
     }
     return r;
   }
+<<<<<<< HEAD
   virtual int get(const string &prefix,
 		  const char *key, size_t keylen,
 		  bufferlist *value) {
     return get(prefix, string(key, keylen), value);
+=======
+  virtual int get_from_shard(const KeyValueDB::Shard s,
+			     const std::string &prefix,
+			     const std::string &key,
+			     bufferlist *value) {
+    assert(0 == "Not implemented");
+>>>>>>> 42acb9f3da2e0b77b7f8bf71d43b2439617563c5
   }
 
   class GenericIteratorImpl {

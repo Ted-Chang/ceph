@@ -337,6 +337,8 @@ private:
   bool kv_stop;
   deque<TransContext*> kv_queue, kv_committing;
 
+  std::vector<KeyValueDB::Shard> shards;
+
   //Logger *logger;
   PerfCounters *logger;
   std::mutex reap_lock;
@@ -392,10 +394,12 @@ private:
     kv_stop = false;
   }
 
-  void _do_read_stripe(OnodeRef o, uint64_t offset, bufferlist *pbl);
-  void _do_write_stripe(TransContext *txc, OnodeRef o,
-			uint64_t offset, bufferlist& bl);
-  void _do_remove_stripe(TransContext *txc, OnodeRef o, uint64_t offset);
+  void _do_read_stripe(KeyValueDB::Shard s, OnodeRef o,
+		       uint64_t offset, bufferlist *pbl);
+  void _do_write_stripe(TransContext *txc, KeyValueDB::Shard s,
+			OnodeRef o, uint64_t offset, bufferlist& bl);
+  void _do_remove_stripe(TransContext *txc, KeyValueDB::Shard s,
+			 OnodeRef o, uint64_t offset);
 
   int _collection_list(
     Collection *c, const ghobject_t& start, const ghobject_t& end,
@@ -464,6 +468,7 @@ public:
     uint32_t op_flags = 0,
     bool allow_eio = false);
   int _do_read(
+    KeyValueDB::Shard s,
     OnodeRef o,
     uint64_t offset,
     size_t len,
@@ -575,6 +580,7 @@ private:
 	     bufferlist& bl,
 	     uint32_t fadvise_flags);
   int _do_write(TransContext *txc,
+		KeyValueDB::Shard s,
 		OnodeRef o,
 		uint64_t offset, uint64_t length,
 		bufferlist& bl,
@@ -587,6 +593,7 @@ private:
 	    OnodeRef& o,
 	    uint64_t offset, size_t len);
   int _do_truncate(TransContext *txc,
+		   KeyValueDB::Shard s,
 		   OnodeRef o,
 		   uint64_t offset);
   int _truncate(TransContext *txc,
@@ -597,6 +604,7 @@ private:
 	      CollectionRef& c,
 	      OnodeRef& o);
   int _do_remove(TransContext *txc,
+		 KeyValueDB::Shard s,
 		 OnodeRef o);
   int _setattr(TransContext *txc,
 	       CollectionRef& c,
